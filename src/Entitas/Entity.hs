@@ -17,6 +17,8 @@ data Entity = Entity {
       cTypes :: Set String
     } deriving (Eq, Ord, Show)
 
+-- |The 'hasComponentOfType' function checks for component type membership in
+-- an Entity's components
 hasComponentOfType :: Entity -> String -> Bool
 hasComponentOfType entity cType = Set.member cType $ cTypes entity
 

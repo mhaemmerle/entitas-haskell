@@ -24,4 +24,4 @@ library
     Entitas.Repository
     Entitas.System
   -- other-modules:       
-  build-depends:     base ==4.6.*, containers, hashable
+  build-depends: base ==4.6.*, containers, hashable
