@@ -6,44 +6,52 @@ import qualified Data.Map as Map
 import qualified Data.Set as Set
 import Data.Maybe
 
-data Component = Component {
-      cType :: String
-    } deriving (Eq, Ord, Show)
-               
-data Entity = Entity {
+
+class (Show c, Ord c, Eq c) => Component c where
+  componentType :: c -> String
+
+data Entity a = Entity {
       id :: String,
       creationIndex :: Int,
-      components :: Map String Component,
+      components :: Map String a,
       cTypes :: Set String
     } deriving (Eq, Ord, Show)
 
 -- |The 'hasComponentOfType' function checks for component type membership in
 -- an Entity's components
-hasComponentOfType :: Entity -> String -> Bool
+hasComponentOfType :: Entity a -> String -> Bool
 hasComponentOfType entity cType = Set.member cType $ cTypes entity
 
-hasComponentsOfTypes :: Entity -> Set String -> Bool
+hasComponentsOfTypes :: Entity a -> Set String -> Bool
 hasComponentsOfTypes entity cTypesIn = Set.isSubsetOf cTypesIn $ cTypes entity
 
-componentOfType :: Entity -> String -> Maybe Component
+componentOfType :: Component a => Entity a -> String -> Maybe a
 componentOfType entity cType = Map.lookup cType $ components entity
 
-containsComponent :: Entity -> Component -> Bool
-containsComponent entity component = isJust $ componentOfType entity $ cType component
+containsComponent :: Component a => Entity a -> a -> Bool
+containsComponent entity component = isJust $ componentOfType entity $ componentType component
 
 -- modifyComponents :: (Map String Component -> Map String Component) -> (Entity -> Entity)
 
-addComponent :: Entity -> Component -> Entity
-addComponent entity component =
-    if hasComponentOfType entity $ cType component then entity else
-        (entity{components = Map.insert (cType component) component $ components entity,
-                cTypes = Set.insert (cType component) $ cTypes entity})
 
-exchangeComponent :: Entity -> Component -> Entity
+makeEntity :: Component a => [a] -> Entity a
+makeEntity cs = Entity "someId" 1 components types
+    where components = Map.fromList $ zip typeList cs  
+          types = Set.fromList typeList
+          typeList = map componentType cs 
+
+
+addComponent :: Component a => Entity a -> a -> Entity a
+addComponent entity component =
+    if hasComponentOfType entity $ componentType component then entity else
+        (entity{components = Map.insert (componentType component) component $ components entity,
+                cTypes = Set.insert (componentType component) $ cTypes entity})
+
+exchangeComponent :: Component a => Entity a -> a -> Entity a
 exchangeComponent entity component =
     addComponent entity component
 
-removeComponentOfType :: Entity -> String -> Entity
+removeComponentOfType :: Entity a -> String -> Entity a
 removeComponentOfType entity cType =
     if not $ hasComponentOfType entity cType then entity else
         (entity{components = Map.delete cType (components entity),
