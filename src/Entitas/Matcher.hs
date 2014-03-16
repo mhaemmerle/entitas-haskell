@@ -6,28 +6,31 @@ import Data.Maybe
 
 import Data.Hashable (hash)
 
-allMatching :: Set String -> Set String -> Bool
+
+type Matcher = (Set String -> Bool)
+
+allMatching :: Set String -> Matcher
 allMatching a b = Set.isSubsetOf a b
 
-anyMatching :: Set String -> Set String -> Bool
+anyMatching :: Set String -> Matcher
 anyMatching a b = not $ Set.null $ Set.intersection a b
 
 equal :: Set String -> Set String -> Bool
 equal a b = a == b
 
-allOf :: Set String -> [String] -> Bool
-allOf a b = allMatching a $ Set.fromList b
+allOf :: [String] -> Matcher
+allOf a b = allMatching b $ Set.fromList a
 
-allOfSet :: Set String -> Set String -> Bool
+allOfSet :: Set String -> Matcher
 allOfSet a b = allMatching a b
 
-anyOf :: Set String -> [String] -> Bool
-anyOf a b = anyMatching a $ Set.fromList b
+anyOf :: [String] -> Matcher
+anyOf a b = anyMatching b $ Set.fromList a
 
-anyOfSet :: Set String -> Set String -> Bool
+anyOfSet :: Set String -> Matcher
 anyOfSet a b = anyMatching a b
 
-just :: String -> Set String -> Bool
+just :: String -> Matcher
 just a b = allMatching (Set.singleton a) b
 
 toKey :: String -> [String] -> Int

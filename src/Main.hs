@@ -24,33 +24,7 @@ data ComponentData = Position (Integer, Integer)
 instance Component ComponentData where
   componentType c = (words $ show c) !! 0
    
-
--- move to entity module
--- newEntity :: Int -> Map String a -> Set String -> Entity a
--- newEntity creationIndex components cTypes =
---     Entity.Entity "someId" creationIndex components cTypes
-
--- createTestEntity :: (Component a) => a -> Int -> Entity a
--- createTestEntity component creationIndex = newEntity creationIndex components cTypes
---     where components = Map.insert (componentType component) component $ Map.empty
---           cTypes = Set.insert (componentType component) $ Set.empty
-
--- move to repository module
--- newRepository :: Map Int (Entity a) -> Map String (Set (Collection a)) -> Int -> Repository a
--- newRepository entities collectionsForType currentIndex =
---     Repository.Repository entities collectionsForType currentIndex
--- 
--- createTestRepository :: Repository a
--- createTestRepository =
---     newRepository (Map.empty) (Map.empty) 0
-
--- main :: IO ()
--- main = do
---   putStrLn $ show $ createTestRepository
---   putStrLn $ show $ createTestEntity "id1" 0 "c1"
-
-
-
+  
 main :: IO ()
 main = runCurses $ do
   
@@ -75,9 +49,9 @@ main = runCurses $ do
 renderLoop :: Window -> Repository ComponentData -> Curses ()
 renderLoop w r = do 
   
-  let es = (entitiesForMatcher r $ allOfSet $ Set.singleton "Position")::[Entity ComponentData]
+  let es = (entitiesForMatcher r $ allOf ["Position", "Player"])::[Entity ComponentData]
   let e = es !! 0
-  let Just (Position (x, y)) = componentOfType e "Position"
+  let Just (Position (x, y)) = componentOfType e "Position" -- why does this work if no entity has the Player component? (see line 31)
   
   loop y x where 
     
